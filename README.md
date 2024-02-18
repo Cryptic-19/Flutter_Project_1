@@ -9,7 +9,7 @@ Also implemented media query
 
 ## Module 2
 
-First Commit: Implemented Log In and Authorization.
+First Commit: Implemented Log In and Authorization.\n
 Second Commit: Implemented automatic SAVE feature for calculations separately for each user.
 Will try to complete the next few tasks as soon as possible.
 
