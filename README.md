@@ -1,16 +1,14 @@
-# calculator
+# Calculator
 
-A new Flutter project.
+A working calculator app flutter project.
 
-## Getting Started
+## Module 1
 
-This project is a starting point for a Flutter application.
+In module 1 we made a basic calculator app with the help of flutter.
+Also implemented media query
 
-A few resources to get you started if this is your first Flutter project:
+## Module 2
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+First Commit: Implemented Log In and Authorization.
+Will try to complete the next few tasks as soon as possible.
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
