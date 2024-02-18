@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "449143013912",
+    "project_id": "calci-8405f",
+    "storage_bucket": "calci-8405f.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:449143013912:android:fb2c1d860740277c64b96d",
+        "android_client_info": {
+          "package_name": "com.kryptic.calculator"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAH3ionmU46GaHi0h2KU8_MIhYGjRM7Mf0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
