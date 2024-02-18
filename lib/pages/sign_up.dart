@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:calculator/components/my_textfield.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:calculator/pages/login_page.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class SignUp extends StatefulWidget {
   SignUp({super.key});
@@ -53,6 +54,7 @@ class _SignUpState extends State<SignUp> {
           email: emailController.text,
           password: passwordController.text,
         );
+        addUser(emailController.text);
         Navigator.pop(context);
       } else {
         Navigator.pop(context);
@@ -64,6 +66,10 @@ class _SignUpState extends State<SignUp> {
 
       showErrorMsg(e.code);
     }
+  }
+
+  Future addUser(String email) async {
+    await FirebaseFirestore.instance.collection('user:' + email).add({});
   }
 
   @override

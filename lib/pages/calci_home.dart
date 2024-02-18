@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:math';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 /*void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -21,13 +22,13 @@ class Calci extends StatelessWidget {
         useMaterial3: true,
         scaffoldBackgroundColor: Colors.white,
       ),
-      home: const MyHomePage(title: 'Calculator'),
+      home: MyHomePage(title: 'Calculator'),
     );
   }
 }
 
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
+  MyHomePage({super.key, required this.title});
 
   final String title;
 
@@ -43,9 +44,16 @@ class _MyHomePageState extends State<MyHomePage> {
   String operand = '';
   double f = 0.0;
   int s = 0;
+  final user = FirebaseAuth.instance.currentUser!;
 
   void signUserOut() {
     FirebaseAuth.instance.signOut();
+  }
+
+  Future addCalc(String email, String calculation) async {
+    await FirebaseFirestore.instance
+        .collection('user:' + email)
+        .add({'calculation': calculation});
   }
 
   void showErrorMsg(String message) {
@@ -82,6 +90,8 @@ class _MyHomePageState extends State<MyHomePage> {
         num2 = double.parse(_final);
         if (operand == '+') {
           _final = (num1 + num2).toString();
+          addCalc(user.email!,
+              num1.toString() + " + " + num2.toString() + " = " + _final);
           _temp = num1.toString();
           _round();
           num1 = 0.0;
@@ -89,6 +99,8 @@ class _MyHomePageState extends State<MyHomePage> {
           operand = '';
         } else if (operand == '-') {
           _final = (num1 - num2).toString();
+          addCalc(user.email!,
+              num1.toString() + " - " + num2.toString() + " = " + _final);
           _temp = num1.toString();
           _round();
           num1 = 0.0;
@@ -96,6 +108,8 @@ class _MyHomePageState extends State<MyHomePage> {
           operand = '';
         } else if (operand == 'x') {
           _final = (num1 * num2).toString();
+          addCalc(user.email!,
+              num1.toString() + " x " + num2.toString() + " = " + _final);
           _temp = num1.toString();
           _round();
           num1 = 0.0;
@@ -108,6 +122,8 @@ class _MyHomePageState extends State<MyHomePage> {
             _final = 'Infinity';
           } else {
             _final = (pow(num1, num2)).toString();
+            addCalc(user.email!,
+                num1.toString() + " ^ " + num2.toString() + " = " + _final);
             _temp = num1.toString();
             _round();
             num1 = 0.0;
@@ -117,6 +133,8 @@ class _MyHomePageState extends State<MyHomePage> {
         } else if (operand == '÷') {
           if (num2 != 0) {
             _final = (num1 / num2).toString();
+            addCalc(user.email!,
+                num1.toString() + " ÷ " + num2.toString() + " = " + _final);
             _temp = num1.toString();
             _round();
             num1 = 0.0;
@@ -225,9 +243,10 @@ class _MyHomePageState extends State<MyHomePage> {
       if (_final != 'Error') {
         f = double.parse(_final);
         if (f >= 0) {
-          f = log(f);
+          double lnf = log(f);
           s = 1;
-          _final = f.toString();
+          _final = lnf.toString();
+          addCalc(user.email!, "ln(" + f.toString() + ") = " + _final);
         } else {
           _final = 'Error';
         }
@@ -242,9 +261,10 @@ class _MyHomePageState extends State<MyHomePage> {
       if (_final != 'Error') {
         f = double.parse(_final);
         if (f >= 0) {
-          f = sqrt(f);
+          double sqrtf = sqrt(f);
           s = 1;
-          _final = f.toString();
+          _final = sqrtf.toString();
+          addCalc(user.email!, "sqrt(" + f.toString() + ") = " + _final);
         } else {
           _final = 'Error';
         }
