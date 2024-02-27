@@ -9,8 +9,9 @@ Also implemented media query
 
 ## Module 2
 
-- First Commit: Implemented Log In and Authorization.
-- Second Commit: Implemented automatic SAVE feature for calculations separately for each user.
+- First Major Commit: Implemented Log In and Authorization.
+- Second Major Commit: Implemented automatic SAVE feature for calculations separately for each user.
+- Third Major Commit: Fixed the bugs in implementation of SAVE feature and now user can also access the history log, along with delete feature.
 
-Will try to complete the next few tasks as soon as possible.
+Module 2 is completed.
 
