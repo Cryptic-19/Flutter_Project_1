@@ -2,12 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:math';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-
-/*void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-
-  runApp(const Calci());
-}*/
+import 'package:calculator/components/my_button.dart';
 
 class Calci extends StatelessWidget {
   const Calci({super.key});
@@ -42,18 +37,50 @@ class _MyHomePageState extends State<MyHomePage> {
   double num1 = 0.0;
   double num2 = 0.0;
   String operand = '';
+  String history = '';
+  // ignore: non_constant_identifier_names
+  String sp_history = '';
   double f = 0.0;
   int s = 0;
+  bool showHistory = false;
+
+  void hisPage() {
+    setState(() {
+      showHistory = !showHistory;
+    });
+  }
+
+  bool present() {
+    if (history.contains('+') ||
+        history.contains('-') ||
+        history.contains('^')) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  void cond(String op) {
+    if (sp_history.isEmpty) {
+      if (present()) {
+        history = "(" + history + ")" + op + _final;
+      } else {
+        history = history + op + _final;
+      }
+    } else {
+      if (present()) {
+        history = "(" + history + ")" + op + sp_history;
+      } else {
+        history = history + op + sp_history;
+      }
+      sp_history = '';
+    }
+  }
+
   final user = FirebaseAuth.instance.currentUser!;
 
   void signUserOut() {
     FirebaseAuth.instance.signOut();
-  }
-
-  Future addCalc(String email, String calculation) async {
-    await FirebaseFirestore.instance
-        .collection('user:' + email)
-        .add({'calculation': calculation});
   }
 
   void showErrorMsg(String message) {
@@ -89,27 +116,37 @@ class _MyHomePageState extends State<MyHomePage> {
       } else if (_final.isNotEmpty) {
         num2 = double.parse(_final);
         if (operand == '+') {
+          if (sp_history.isEmpty) {
+            history = history + " + " + _final;
+          } else {
+            history = history + " + " + sp_history;
+            sp_history = '';
+          }
           _final = (num1 + num2).toString();
-          addCalc(user.email!,
-              num1.toString() + " + " + num2.toString() + " = " + _final);
+
           _temp = num1.toString();
           _round();
           num1 = 0.0;
           num2 = 0.0;
           operand = '';
         } else if (operand == '-') {
+          if (sp_history.isEmpty) {
+            history = history + " - " + _final;
+          } else {
+            history = history + " - " + sp_history;
+            sp_history = '';
+          }
           _final = (num1 - num2).toString();
-          addCalc(user.email!,
-              num1.toString() + " - " + num2.toString() + " = " + _final);
+
           _temp = num1.toString();
           _round();
           num1 = 0.0;
           num2 = 0.0;
           operand = '';
         } else if (operand == 'x') {
+          cond(' x ');
           _final = (num1 * num2).toString();
-          addCalc(user.email!,
-              num1.toString() + " x " + num2.toString() + " = " + _final);
+
           _temp = num1.toString();
           _round();
           num1 = 0.0;
@@ -121,9 +158,14 @@ class _MyHomePageState extends State<MyHomePage> {
           } else if ((pow(num1, num2)).isInfinite) {
             _final = 'Infinity';
           } else {
+            if (sp_history.isEmpty) {
+              history = "(" + history + ")" + " ^ " + _final;
+            } else {
+              history = "(" + history + ")" + " ^ " + sp_history;
+              sp_history = '';
+            }
             _final = (pow(num1, num2)).toString();
-            addCalc(user.email!,
-                num1.toString() + " ^ " + num2.toString() + " = " + _final);
+
             _temp = num1.toString();
             _round();
             num1 = 0.0;
@@ -132,9 +174,9 @@ class _MyHomePageState extends State<MyHomePage> {
           }
         } else if (operand == '÷') {
           if (num2 != 0) {
+            cond(' ÷ ');
             _final = (num1 / num2).toString();
-            addCalc(user.email!,
-                num1.toString() + " ÷ " + num2.toString() + " = " + _final);
+
             _temp = num1.toString();
             _round();
             num1 = 0.0;
@@ -158,6 +200,8 @@ class _MyHomePageState extends State<MyHomePage> {
       num2 = 0.0;
       operand = '';
       s = 0;
+      history = '';
+      sp_history = '';
     });
   }
 
@@ -177,6 +221,12 @@ class _MyHomePageState extends State<MyHomePage> {
           operand = op;
         } else {
           num1 = double.parse(_final);
+          if (sp_history.isEmpty) {
+            history = _final;
+          } else {
+            history = sp_history;
+            sp_history = '';
+          }
           _final = '';
           operand = op;
         }
@@ -246,7 +296,11 @@ class _MyHomePageState extends State<MyHomePage> {
           double lnf = log(f);
           s = 1;
           _final = lnf.toString();
-          addCalc(user.email!, "ln(" + f.toString() + ") = " + _final);
+          if (sp_history.isEmpty) {
+            sp_history = "ln(" + f.toString() + ")";
+          } else {
+            sp_history = "ln(" + sp_history + ")";
+          }
         } else {
           _final = 'Error';
         }
@@ -264,7 +318,12 @@ class _MyHomePageState extends State<MyHomePage> {
           double sqrtf = sqrt(f);
           s = 1;
           _final = sqrtf.toString();
-          addCalc(user.email!, "sqrt(" + f.toString() + ") = " + _final);
+          //addCalc(user.email!, "sqrt(" + f.toString() + ") = " + _final);
+          if (sp_history.isEmpty) {
+            sp_history = "sqrt(" + f.toString() + ")";
+          } else {
+            sp_history = "sqrt(" + sp_history + ")";
+          }
         } else {
           _final = 'Error';
         }
@@ -300,368 +359,266 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
+  Future addCalc(String email, String calculation) async {
+    await FirebaseFirestore.instance
+        .collection('user:' + email)
+        .add({'calculation': calculation, 'time': Timestamp.now()});
+  }
+
+  Future deleteCalc(String email, String docID) {
+    return FirebaseFirestore.instance
+        .collection('user:' + email)
+        .doc(docID)
+        .delete();
+  }
+
+  Stream<QuerySnapshot> getHistory(String email) {
+    final historyStream = FirebaseFirestore.instance
+        .collection('user:' + email)
+        .orderBy('time', descending: true)
+        .snapshots();
+    return historyStream;
+  }
+
   @override
   Widget build(BuildContext context) {
-    double displayW = MediaQuery.of(context).size.width;
+    //double displayW = MediaQuery.of(context).size.width;
     double displayH = MediaQuery.of(context).size.height;
-    return Scaffold(
-      appBar: AppBar(
-        foregroundColor: Colors.black,
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Text(widget.title),
-        centerTitle: true,
-        actions: [
-          IconButton(
-            onPressed: signUserOut,
-            icon: Icon(Icons.logout),
-          )
-        ],
-      ),
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: <Widget>[
-          Align(
-            alignment: Alignment.topRight,
-            child: Text(_temp,
+    if (showHistory) {
+      return Scaffold(
+        appBar: AppBar(
+          title: const Text("History"),
+          foregroundColor: Colors.black,
+          backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+          actions: [
+            IconButton(
+              onPressed: hisPage,
+              icon: const Icon(Icons.arrow_back_ios_outlined),
+            ),
+          ],
+        ),
+        body: StreamBuilder<QuerySnapshot>(
+          stream: getHistory(user.email!),
+          builder: (context, snapshot) {
+            if (snapshot.hasData) {
+              List calcList = snapshot.data!.docs;
+              return ListView.builder(
+                itemCount: calcList.length,
+                itemBuilder: (context, index) {
+                  DocumentSnapshot document = calcList[index];
+                  String docID = document.id;
+
+                  Map<String, dynamic> data =
+                      document.data() as Map<String, dynamic>;
+                  String entry = data['calculation'];
+
+                  return ListTile(
+                      title: Text(entry),
+                      trailing: IconButton(
+                          onPressed: () => deleteCalc(user.email!, docID),
+                          icon: const Icon(Icons.delete)));
+                },
+              );
+            } else {
+              return const Text('loading...');
+            }
+          },
+        ),
+      );
+    } else {
+      return Scaffold(
+        appBar: AppBar(
+          foregroundColor: Colors.black,
+          backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+          title: Text(widget.title),
+          centerTitle: true,
+          actions: [
+            IconButton(
+              onPressed: hisPage,
+              icon: const Icon(Icons.history),
+            ),
+            IconButton(
+              onPressed: signUserOut,
+              icon: const Icon(Icons.logout),
+            ),
+          ],
+        ),
+        body: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: <Widget>[
+            Align(
+              alignment: Alignment.topRight,
+              child: Text(_temp,
+                  style: const TextStyle(
+                    color: Colors.grey,
+                    fontSize: 28,
+                    fontWeight: FontWeight.w400,
+                  )),
+            ),
+            Text(_final,
                 style: const TextStyle(
-                  color: Colors.grey,
                   fontSize: 28,
-                  fontWeight: FontWeight.w400,
+                  overflow: TextOverflow.fade,
                 )),
-          ),
-          Text(_final,
-              style: const TextStyle(
-                fontSize: 28,
-                overflow: TextOverflow.fade,
-              )),
-          Column(
-            children: <Widget>[
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: <Widget>[
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      elevation: 3,
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16.0)),
-                      minimumSize: Size(displayW * 0.20, displayH * 0.075),
-                    ),
-                    onPressed: _eul,
-                    child: const Text('e'),
-                  ),
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      elevation: 3,
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16.0)),
-                      minimumSize: Size(displayW * 0.20, displayH * 0.075),
-                    ),
-                    onPressed: _pi,
-                    child: const Text('π'),
-                  ),
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      foregroundColor: Colors.red,
-                      elevation: 3,
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16.0)),
-                      minimumSize: Size(displayW * 0.20, displayH * 0.075),
-                    ),
-                    onPressed: _clear,
-                    child: const Text('AC'),
-                  ),
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      elevation: 3,
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16.0)),
-                      minimumSize: Size(displayW * 0.20, displayH * 0.075),
-                    ),
-                    onPressed: _backspace,
-                    child: const Icon(Icons.backspace_outlined),
-                  ),
-                ],
-              ),
-              SizedBox(
-                height: displayH * 0.025,
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: <Widget>[
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      elevation: 3,
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16.0)),
-                      minimumSize: Size(displayW * 0.20, displayH * 0.075),
-                    ),
-                    onPressed: _ln,
-                    child: const Text('ln'),
-                  ),
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      elevation: 3,
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16.0)),
-                      minimumSize: Size(displayW * 0.20, displayH * 0.075),
-                    ),
-                    onPressed: _sqrt,
-                    child: const Text('√'),
-                  ),
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      elevation: 3,
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16.0)),
-                      minimumSize: Size(displayW * 0.20, displayH * 0.075),
-                    ),
-                    onPressed: () {
-                      _opC('^');
-                    },
-                    child: const Text('xʸ'),
-                  ),
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      elevation: 3,
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16.0)),
-                      minimumSize: Size(displayW * 0.20, displayH * 0.075),
-                    ),
-                    onPressed: () {
-                      _opC('÷');
-                    },
-                    child: const Text('÷'),
-                  ),
-                ],
-              ),
-              SizedBox(
-                height: displayH * 0.025,
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: <Widget>[
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      elevation: 3,
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16.0)),
-                      minimumSize: Size(displayW * 0.20, displayH * 0.075),
-                    ),
-                    onPressed: () {
-                      _numC('1');
-                    },
-                    child: const Text('1'),
-                  ),
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      elevation: 3,
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16.0)),
-                      minimumSize: Size(displayW * 0.20, displayH * 0.075),
-                    ),
-                    onPressed: () {
-                      _numC('2');
-                    },
-                    child: const Text('2'),
-                  ),
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      elevation: 3,
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16.0)),
-                      minimumSize: Size(displayW * 0.20, displayH * 0.075),
-                    ),
-                    onPressed: () {
-                      _numC('3');
-                    },
-                    child: const Text('3'),
-                  ),
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      elevation: 3,
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16.0)),
-                      minimumSize: Size(displayW * 0.20, displayH * 0.075),
-                    ),
-                    onPressed: () {
-                      _opC('x');
-                    },
-                    child: const Text('x'),
-                  ),
-                ],
-              ),
-              SizedBox(
-                height: displayH * 0.025,
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: <Widget>[
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      elevation: 3,
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16.0)),
-                      minimumSize: Size(displayW * 0.20, displayH * 0.075),
-                    ),
-                    onPressed: () {
-                      _numC('4');
-                    },
-                    child: const Text('4'),
-                  ),
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      elevation: 3,
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16.0)),
-                      minimumSize: Size(displayW * 0.20, displayH * 0.075),
-                    ),
-                    onPressed: () {
-                      _numC('5');
-                    },
-                    child: const Text('5'),
-                  ),
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      elevation: 3,
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16.0)),
-                      minimumSize: Size(displayW * 0.20, displayH * 0.075),
-                    ),
-                    onPressed: () {
-                      _numC('6');
-                    },
-                    child: const Text('6'),
-                  ),
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      elevation: 3,
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16.0)),
-                      minimumSize: Size(displayW * 0.20, displayH * 0.075),
-                    ),
-                    onPressed: () {
-                      _opC('+');
-                    },
-                    child: const Text('+'),
-                  ),
-                ],
-              ),
-              SizedBox(
-                height: displayH * 0.025,
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: <Widget>[
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      elevation: 3,
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16.0)),
-                      minimumSize: Size(displayW * 0.20, displayH * 0.075),
-                    ),
-                    onPressed: () {
-                      _numC('7');
-                    },
-                    child: const Text('7'),
-                  ),
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      elevation: 3,
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16.0)),
-                      minimumSize: Size(displayW * 0.20, displayH * 0.075),
-                    ),
-                    onPressed: () {
-                      _numC('8');
-                    },
-                    child: const Text('8'),
-                  ),
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      elevation: 3,
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16.0)),
-                      minimumSize: Size(displayW * 0.20, displayH * 0.075),
-                    ),
-                    onPressed: () {
-                      _numC('9');
-                    },
-                    child: const Text('9'),
-                  ),
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      elevation: 3,
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16.0)),
-                      minimumSize: Size(displayW * 0.20, displayH * 0.075),
-                    ),
-                    onPressed: () {
-                      _opC('-');
-                    },
-                    child: const Text('-'),
-                  ),
-                ],
-              ),
-              SizedBox(
-                height: displayH * 0.025,
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: <Widget>[
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      elevation: 3,
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16.0)),
-                      minimumSize: Size(displayW * 0.20, displayH * 0.075),
-                    ),
-                    onPressed: _sigC,
-                    child: const Text('±'),
-                  ),
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      elevation: 3,
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16.0)),
-                      minimumSize: Size(displayW * 0.20, displayH * 0.075),
-                    ),
-                    onPressed: () {
-                      _numC('0');
-                    },
-                    child: const Text('0'),
-                  ),
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      elevation: 3,
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16.0)),
-                      minimumSize: Size(displayW * 0.20, displayH * 0.075),
-                    ),
-                    onPressed: () {
-                      _numC('.');
-                    },
-                    child: const Text('.'),
-                  ),
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.lightGreen,
-                      foregroundColor: Colors.white,
-                      shadowColor: Colors.greenAccent,
-                      elevation: 3,
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16.0)),
-                      minimumSize:
-                          Size(displayW * 0.20, displayH * 0.075), //////// HERE
-                    ),
-                    onPressed: _calculate,
-                    child: const Text('='),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
+            Column(
+              children: <Widget>[
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: <Widget>[
+                    MyButton(fnc: _eul, num: const Text('e')),
+                    MyButton(fnc: _pi, num: const Text('π')),
+                    MyButton(
+                        fnc: _clear,
+                        num: const Text('AC'),
+                        fgcolor: Colors.red),
+                    MyButton(
+                        fnc: _backspace,
+                        num: const Icon(Icons.backspace_outlined)),
+                  ],
+                ),
+                SizedBox(
+                  height: displayH * 0.025,
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: <Widget>[
+                    MyButton(fnc: _ln, num: const Text('ln')),
+                    MyButton(fnc: _sqrt, num: const Text('√')),
+                    MyButton(
+                        fnc: () {
+                          _opC('^');
+                        },
+                        num: const Text('xʸ')),
+                    MyButton(
+                        fnc: () {
+                          _opC('÷');
+                        },
+                        num: const Text('÷')),
+                  ],
+                ),
+                SizedBox(
+                  height: displayH * 0.025,
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: <Widget>[
+                    MyButton(
+                        fnc: () {
+                          _numC('7');
+                        },
+                        num: const Text('7')),
+                    MyButton(
+                        fnc: () {
+                          _numC('8');
+                        },
+                        num: const Text('8')),
+                    MyButton(
+                        fnc: () {
+                          _numC('9');
+                        },
+                        num: const Text('9')),
+                    MyButton(
+                        fnc: () {
+                          _opC('x');
+                        },
+                        num: const Text('x')),
+                  ],
+                ),
+                SizedBox(
+                  height: displayH * 0.025,
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: <Widget>[
+                    MyButton(
+                        fnc: () {
+                          _numC('4');
+                        },
+                        num: const Text('4')),
+                    MyButton(
+                        fnc: () {
+                          _numC('5');
+                        },
+                        num: const Text('5')),
+                    MyButton(
+                        fnc: () {
+                          _numC('6');
+                        },
+                        num: const Text('6')),
+                    MyButton(
+                        fnc: () {
+                          _opC('-');
+                        },
+                        num: const Text('-')),
+                  ],
+                ),
+                SizedBox(
+                  height: displayH * 0.025,
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: <Widget>[
+                    MyButton(
+                        fnc: () {
+                          _numC('1');
+                        },
+                        num: const Text('1')),
+                    MyButton(
+                        fnc: () {
+                          _numC('2');
+                        },
+                        num: const Text('2')),
+                    MyButton(
+                        fnc: () {
+                          _numC('3');
+                        },
+                        num: const Text('3')),
+                    MyButton(
+                        fnc: () {
+                          _opC('+');
+                        },
+                        num: const Text('+')),
+                  ],
+                ),
+                SizedBox(
+                  height: displayH * 0.025,
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: <Widget>[
+                    MyButton(fnc: _sigC, num: const Text('±')),
+                    MyButton(
+                        fnc: () {
+                          _numC('0');
+                        },
+                        num: const Text('0')),
+                    MyButton(
+                        fnc: () {
+                          _numC('.');
+                        },
+                        num: const Text('.')),
+                    MyButton(
+                        fnc: () {
+                          _calculate();
+                          if (sp_history.isEmpty && history.isNotEmpty) {
+                            addCalc(user.email!, history + " = " + _final);
+                            history = '';
+                          } else if (sp_history.isNotEmpty) {
+                            addCalc(user.email!, sp_history + " = " + _final);
+                            sp_history = '';
+                          }
+                        },
+                        num: const Text('='),
+                        bgcolor: Colors.lightGreen,
+                        fgcolor: Colors.white,
+                        shcolor: Colors.greenAccent),
+                  ],
+                ),
+              ],
+            ),
+          ],
+        ),
+      );
+    }
   }
 }

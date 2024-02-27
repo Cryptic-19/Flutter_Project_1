@@ -3,6 +3,7 @@ import 'package:calculator/components/my_textfield.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:calculator/pages/login_page.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:calculator/components/my_button.dart';
 
 class SignUp extends StatefulWidget {
   SignUp({super.key});
@@ -69,7 +70,9 @@ class _SignUpState extends State<SignUp> {
   }
 
   Future addUser(String email) async {
-    await FirebaseFirestore.instance.collection('user:' + email).add({});
+    await FirebaseFirestore.instance
+        .collection('user:' + email)
+        .add({'calculation': '', 'time': Timestamp.now()});
   }
 
   @override
@@ -89,17 +92,17 @@ class _SignUpState extends State<SignUp> {
             Icon(Icons.account_circle_outlined,
                 size: 0.0005 * displayH * displayW),
             SizedBox(height: .07 * displayH),
-            Text(
+            const Text(
               'Create An Account',
-              style: const TextStyle(
+              style: TextStyle(
                 color: Colors.black87,
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
               ),
             ),
-            Text(
+            const Text(
               'Join our beautiful world of Arithmetic!',
-              style: const TextStyle(
+              style: TextStyle(
                 color: Colors.black87,
                 fontSize: 16,
               ),
@@ -123,18 +126,12 @@ class _SignUpState extends State<SignUp> {
               obscureText: true,
             ),
             SizedBox(height: .014 * displayH),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.black87,
-                foregroundColor: Colors.white,
-                elevation: 3,
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16.0)),
-                minimumSize: Size(displayW * 0.9, displayH * 0.075),
-              ),
-              onPressed: signUserUp,
-              child: const Text('Sign Up'),
-            ),
+            MyButton(
+                fnc: signUserUp,
+                num: const Text('Sign Up'),
+                bgcolor: Colors.black87,
+                fgcolor: Colors.white,
+                wd: 0.90),
             SizedBox(height: .07 * displayH),
 
             // not a member? register now
